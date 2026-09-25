@@ -59,6 +59,12 @@
         android:text="Stop mocking" />
 
     <Button
+        android:id="@+id/btnVerify"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Verify mock is applied" />
+
+    <Button
         android:id="@+id/btnDevOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

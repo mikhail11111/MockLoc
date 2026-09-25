@@ -9,6 +9,8 @@ import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Tasks
+import java.util.concurrent.TimeUnit
 
 /**
  * Mocks location on BOTH stacks:
@@ -187,6 +189,64 @@ class LocationMockManager(private val context: Context) {
         "Select this app under Settings > Developer options > Select mock location app",
         cause
     )
+
+    data class VerifyResult(
+        val mockSelected: Boolean,
+        val gpsLat: Double?,
+        val gpsLng: Double?,
+        val gpsIsMock: Boolean?,
+        val fusedLat: Double?,
+        val fusedLng: Double?,
+        val error: String?
+    )
+
+    /**
+     * Reads back what the system actually reports on both stacks.
+     * Blocking (fused read waits up to 8s) — call off the main thread.
+     */
+    @SuppressLint("MissingPermission")
+    fun verifyMock(): VerifyResult {
+        val selected = try { isMockSelected() } catch (_: Exception) { false }
+        var error: String? = null
+
+        var gpsLat: Double? = null
+        var gpsLng: Double? = null
+        var gpsIsMock: Boolean? = null
+        try {
+            val gps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (gps != null) {
+                gpsLat = gps.latitude
+                gpsLng = gps.longitude
+                gpsIsMock = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    gps.isMock
+                } else {
+                    @Suppress("DEPRECATION") gps.isFromMockProvider
+                }
+            }
+        } catch (e: SecurityException) {
+            error = "GPS read denied (location permission?): ${e.message}"
+        } catch (e: Exception) {
+            error = "GPS read failed: ${e.message}"
+        }
+
+        var fusedLat: Double? = null
+        var fusedLng: Double? = null
+        try {
+            val fused = Tasks.await(fusedClient.lastLocation, 8, TimeUnit.SECONDS)
+            if (fused != null) {
+                fusedLat = fused.latitude
+                fusedLng = fused.longitude
+            } else {
+                val msg = "Fused returned null (Play Services location off?)"
+                error = if (error == null) msg else "$error; $msg"
+            }
+        } catch (e: Exception) {
+            val msg = "Fused read failed: ${e.message}"
+            error = if (error == null) msg else "$error; $msg"
+        }
+
+        return VerifyResult(selected, gpsLat, gpsLng, gpsIsMock, fusedLat, fusedLng, error)
+    }
 
     companion object {
         private const val TAG = "LocationMockManager"

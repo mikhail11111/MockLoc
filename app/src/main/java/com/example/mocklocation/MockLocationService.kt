@@ -51,7 +51,12 @@ class MockLocationService : Service() {
                 startForegroundWithNotification()
                 try {
                     mockManager.startMocking(lat, lng)
+                    getSharedPreferences("mock_prefs", MODE_PRIVATE)
+                        .edit().remove(MainActivity.KEY_LAST_ERROR).apply()
                 } catch (e: LocationMockManager.MockNotSelectedException) {
+                    // Surface it in the activity — otherwise the failure is silent
+                    getSharedPreferences("mock_prefs", MODE_PRIVATE)
+                        .edit().putString(MainActivity.KEY_LAST_ERROR, e.message).apply()
                     stopSelf()
                     return START_NOT_STICKY
                 }

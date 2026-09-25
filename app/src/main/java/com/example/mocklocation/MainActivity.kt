@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -48,6 +49,7 @@ class MainActivity : AppCompatActivity() {
 
         btnStart.setOnClickListener { startMocking() }
         btnStop.setOnClickListener { stopMocking() }
+        findViewById<Button>(R.id.btnVerify).setOnClickListener { verifyMocking() }
 
         requestLocationPermissions()
         refreshStatus()
@@ -55,7 +57,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        refreshStatus()
+        // Surface silent service failures (e.g. mock permission revoked)
+        val lastError = prefs.getString(KEY_LAST_ERROR, null)
+        if (lastError != null) {
+            tvStatus.text = "ERROR: $lastError"
+            Toast.makeText(this, lastError, Toast.LENGTH_LONG).show()
+        } else {
+            refreshStatus()
+        }
     }
 
     private fun startMocking() {
@@ -74,7 +83,8 @@ class MainActivity : AppCompatActivity() {
             showMockNotSelectedDialog()
             return
         }
-        prefs.edit().putString(KEY_LAT, lat.toString()).putString(KEY_LNG, lng.toString()).apply()
+        prefs.edit().putString(KEY_LAT, lat.toString()).putString(KEY_LNG, lng.toString())
+            .remove(KEY_LAST_ERROR).apply()
 
         try {
             val intent = Intent(this, MockLocationService::class.java).apply {
@@ -109,6 +119,54 @@ class MainActivity : AppCompatActivity() {
     private fun refreshStatus() {
         val selected = try { mockManager.isMockSelected() } catch (_: Exception) { false }
         tvStatus.text = if (selected) getString(R.string.status_ready)
+        else getString(R.string.status_not_selected)
+    }
+
+    /** Reads back what the OS actually reports and compares it to the entered point. */
+    private fun verifyMocking() {
+        val expLat = etLat.text.toString().toDoubleOrNull()
+        val expLng = etLng.text.toString().toDoubleOrNull()
+        if (expLat == null || expLng == null) {
+            Toast.makeText(this, "Enter lat/lng first", Toast.LENGTH_SHORT).show()
+            return
+        }
+        tvStatus.text = "Checking what the system reports..."
+        Thread {
+            val result = try {
+                mockManager.verifyMock()
+            } catch (e: Exception) {
+                null
+            }
+            runOnUiThread { showVerifyResult(result, expLat, expLng) }
+        }.start()
+    }
+
+    private fun showVerifyResult(
+        r: LocationMockManager.VerifyResult?, expLat: Double, expLng: Double
+    ) {
+        if (r == null) {
+            tvStatus.text = "Verify failed with an exception."
+            return
+        }
+        fun match(lat: Double?, lng: Double?): String {
+            if (lat == null || lng == null) return "no data"
+            val res = FloatArray(1)
+            Location.distanceBetween(expLat, expLng, lat, lng, res)
+            return if (res[0] < 500) "MATCHES mock (${res[0].toInt()} m off)"
+            else "SHOWS SOMETHING ELSE (${(res[0] / 1000).toInt()} km away)"
+        }
+        val msg =
+            "Mock app selected: ${r.mockSelected}\n\n" +
+            "GPS provider reports:\n${r.gpsLat ?: "?"}, ${r.gpsLng ?: "?"} → ${match(r.gpsLat, r.gpsLng)}" +
+            (if (r.gpsIsMock == true) " [isMock=true]" else "") + "\n\n" +
+            "Fused provider reports:\n${r.fusedLat ?: "?"}, ${r.fusedLng ?: "?"} → ${match(r.fusedLat, r.fusedLng)}" +
+            (if (r.error != null) "\n\nNote: ${r.error}" else "")
+        AlertDialog.Builder(this)
+            .setTitle("Verification result")
+            .setMessage(msg)
+            .setPositiveButton("OK", null)
+            .show()
+        tvStatus.text = if (r.mockSelected) getString(R.string.status_ready)
         else getString(R.string.status_not_selected)
     }
 
@@ -154,5 +212,6 @@ class MainActivity : AppCompatActivity() {
         private const val PREFS = "mock_prefs"
         private const val KEY_LAT = "lat"
         private const val KEY_LNG = "lng"
+        const val KEY_LAST_ERROR = "last_error"
     }
 }
