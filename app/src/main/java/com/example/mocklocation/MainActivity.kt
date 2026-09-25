@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         btnStart.setOnClickListener { startMocking() }
         btnStop.setOnClickListener { stopMocking() }
         findViewById<Button>(R.id.btnVerify).setOnClickListener { verifyMocking() }
+        findViewById<Button>(R.id.btnIpCountry).setOnClickListener { detectIpCountry() }
 
         requestLocationPermissions()
         refreshStatus()
@@ -187,8 +188,50 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun hasLocationPermission(): Boolean {
-        val fine = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+    /** Detects the current IP country and offers to mock inside it. */
+    private fun detectIpCountry() {
+        tvStatus.text = "Detecting country from IP address..."
+        Thread {
+            try {
+                val geo = IpCountryLocator.fetch()
+                val point = geo.resolveLatLng()
+                runOnUiThread {
+                    if (point == null) {
+                        tvStatus.text = "IP country found (${geo.label()}) but no coordinates available."
+                        Toast.makeText(
+                            this, "No coordinates for ${geo.country}", Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        showIpCountryDialog(geo, point.first, point.second)
+                    }
+                }
+            } catch (e: Exception) {
+                runOnUiThread {
+                    tvStatus.text = "IP lookup failed (no internet?)."
+                    Toast.makeText(this, "IP lookup failed: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
+    }
+
+    private fun showIpCountryDialog(geo: IpCountryLocator.IpGeo, lat: Double, lng: Double) {
+        val msg = "IP: ${geo.ip.ifBlank { "?" }}\n" +
+            "Country: ${geo.country.ifBlank { geo.countryCode }}\n" +
+            "City: ${geo.city.ifBlank { "?" }}\n\n" +
+            "Mock location to:\n$lat, $lng"
+        AlertDialog.Builder(this)
+            .setTitle("IP country detected")
+            .setMessage(msg)
+            .setPositiveButton("Mock here") { _, _ ->
+                etLat.setText(lat.toString())
+                etLng.setText(lng.toString())
+                startMocking()
+            }
+            .setNegativeButton("Cancel") { _, _ -> refreshStatus() }
+            .show()
+    }
+
+    private fun hasLocationPermission(): Boolean {        val fine = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
         return fine == PackageManager.PERMISSION_GRANTED
     }
 

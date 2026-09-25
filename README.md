@@ -7,6 +7,8 @@ Appears in **Settings → Developer options → Select mock location app**.
   - `LocationManager` test providers (GPS + Network),
   - Play Services **Fused** provider via `setMockMode(true)` + `setMockLocation()` (this is what Google Maps & co. actually use).
 - **Stop mocking** removes test providers and disables fused mock mode.
+- **Verify mock is applied** reads back what Android reports on GPS + Fused and compares it to the entered point.
+- **Set location from IP country** detects the country from the public IP (ipwho.is → freeipapi.com fallback, no API key; follows VPN) and offers to mock the detected city (or the country's capital as fallback).
 - Persists last coordinates. Shows hint if app is not selected as mock app.
 
 ## Why it shows in Developer options
