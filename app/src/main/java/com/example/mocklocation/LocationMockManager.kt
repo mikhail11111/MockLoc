@@ -197,6 +197,7 @@ class LocationMockManager(private val context: Context) {
         val gpsIsMock: Boolean?,
         val fusedLat: Double?,
         val fusedLng: Double?,
+        val fusedIsMock: Boolean?,
         val error: String?
     )
 
@@ -231,11 +232,17 @@ class LocationMockManager(private val context: Context) {
 
         var fusedLat: Double? = null
         var fusedLng: Double? = null
+        var fusedIsMock: Boolean? = null
         try {
             val fused = Tasks.await(fusedClient.lastLocation, 8, TimeUnit.SECONDS)
             if (fused != null) {
                 fusedLat = fused.latitude
                 fusedLng = fused.longitude
+                fusedIsMock = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    fused.isMock
+                } else {
+                    @Suppress("DEPRECATION") fused.isFromMockProvider
+                }
             } else {
                 val msg = "Fused returned null (Play Services location off?)"
                 error = if (error == null) msg else "$error; $msg"
@@ -245,7 +252,7 @@ class LocationMockManager(private val context: Context) {
             error = if (error == null) msg else "$error; $msg"
         }
 
-        return VerifyResult(selected, gpsLat, gpsLng, gpsIsMock, fusedLat, fusedLng, error)
+        return VerifyResult(selected, gpsLat, gpsLng, gpsIsMock, fusedLat, fusedLng, fusedIsMock, error)
     }
 
     companion object {

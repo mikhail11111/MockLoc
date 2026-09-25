@@ -51,5 +51,6 @@ app/src/main/
 - Must be **selected** as mock app or `SecurityException` is thrown (app shows dialog).
 - Fused mock needs Google Play Services on the device (any stock phone has it).
 - If Maps still shows the real spot: make sure this app is selected as mock app, location is ON, then **Stop → Start** again and wait ~5s for the blue dot to jump.
+- Apps with anti-fraud (Yandex Maps/Go, some banking/taxi apps) check Android's `isMock` flag and deliberately ignore mocked fixes. The Verify screen shows `[isMock=true]` — that flag is set by Android itself and no non-root app can clear it. Options: airplane mode + Wi-Fi (kills cell-tower geolocation so the app falls back to GPS), or root + Smali Patcher / "Mock Mock Locations" Xposed module.
 - Android 12+ requires `FOREGROUND_SERVICE_LOCATION` + foregroundServiceType="location" (already declared).
 - Some banking / games detect `isMock()` / `isFromMockProvider()` and refuse to work — expected.

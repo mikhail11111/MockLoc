@@ -160,6 +160,7 @@ class MainActivity : AppCompatActivity() {
             "GPS provider reports:\n${r.gpsLat ?: "?"}, ${r.gpsLng ?: "?"} → ${match(r.gpsLat, r.gpsLng)}" +
             (if (r.gpsIsMock == true) " [isMock=true]" else "") + "\n\n" +
             "Fused provider reports:\n${r.fusedLat ?: "?"}, ${r.fusedLng ?: "?"} → ${match(r.fusedLat, r.fusedLng)}" +
+            (if (r.fusedIsMock == true) " [isMock=true]" else "") +
             (if (r.error != null) "\n\nNote: ${r.error}" else "")
         AlertDialog.Builder(this)
             .setTitle("Verification result")
