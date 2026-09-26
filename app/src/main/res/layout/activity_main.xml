@@ -71,6 +71,12 @@
         android:text="Set location from IP country" />
 
     <Button
+        android:id="@+id/btnBattery"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Keep mock alive (battery exemption)" />
+
+    <Button
         android:id="@+id/btnDevOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

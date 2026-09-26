@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         btnStop.setOnClickListener { stopMocking() }
         findViewById<Button>(R.id.btnVerify).setOnClickListener { verifyMocking() }
         findViewById<Button>(R.id.btnIpCountry).setOnClickListener { detectIpCountry() }
+        findViewById<Button>(R.id.btnBattery).setOnClickListener { requestBatteryExemption() }
 
         requestLocationPermissions()
         refreshStatus()
@@ -113,6 +114,8 @@ class MainActivity : AppCompatActivity() {
         try {
             mockManager.stopMocking()
         } catch (_: Exception) {}
+        // Explicit user stop — must survive service restarts/reboot prompts
+        prefs.edit().remove(MockLocationService.KEY_MOCKING).apply()
         refreshStatus()
         Toast.makeText(this, "Mock stopped", Toast.LENGTH_SHORT).show()
     }
@@ -229,6 +232,26 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel") { _, _ -> refreshStatus() }
             .show()
+    }
+
+    /** Asks the system to exempt the app from battery optimization so the
+     * mock service isn't killed in the background (key for persistence). */
+    private fun requestBatteryExemption() {
+        val pm = getSystemService(POWER_SERVICE) as android.os.PowerManager
+        if (pm.isIgnoringBatteryOptimizations(packageName)) {
+            Toast.makeText(this, "Already exempt from battery optimization", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            startActivity(
+                Intent(
+                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    android.net.Uri.parse("package:$packageName")
+                )
+            )
+        } catch (_: Exception) {
+            Toast.makeText(this, "Exemption request not supported here", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun hasLocationPermission(): Boolean {        val fine = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
