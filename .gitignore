@@ -8,3 +8,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Release signing key stays local, never committed
+release.keystore
+*.jks
+*.keystore

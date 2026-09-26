@@ -3,6 +3,15 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// Release signing key (release.keystore) + passwords in ~/.gradle/gradle.properties
+// stay on the build machine and are gitignored. Without them the release build
+// stays unsigned (app-release-unsigned.apk).
+def releaseKs = rootProject.file("release.keystore")
+def releaseStorePass = findProperty("RELEASE_STORE_PASSWORD")
+def releaseKeyAlias = findProperty("RELEASE_KEY_ALIAS") ?: "mocklocation"
+def releaseKeyPass = findProperty("RELEASE_KEY_PASSWORD")
+def hasReleaseSigning = releaseKs.exists() && releaseStorePass != null && releaseKeyPass != null
+
 android {
     namespace = "com.example.mocklocation"
     compileSdk = 34
@@ -15,6 +24,16 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile releaseKs
+                storePassword releaseStorePass
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPass
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -22,6 +41,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     compileOptions {
