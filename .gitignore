@@ -12,3 +12,7 @@ local.properties
 release.keystore
 *.jks
 *.keystore
+# .NET build outputs
+[Bb]in/
+[Oo]bj/
+[Pp]ublish/

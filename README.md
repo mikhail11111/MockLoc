@@ -1,6 +1,7 @@
-# MockLoc — Android mock location app
+# MockLoc — mock location apps (Android + Windows)
 
-Appears in **Settings → Developer options → Select mock location app**.
+Android app: appears in **Settings → Developer options → Select mock location app**.
+Windows app: see [windows/README.md](windows/README.md) (sets the system default location).
 
 ## What it does
 - Enter lat/lng → **Start mocking** → mocks every 1s via foreground service on both stacks:
