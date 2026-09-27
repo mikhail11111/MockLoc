@@ -1,4 +1,4 @@
-package com.example.mocklocation
+package com.mockloc.app
 
 import android.annotation.SuppressLint
 import android.content.Context

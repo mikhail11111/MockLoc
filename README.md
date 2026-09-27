@@ -1,4 +1,4 @@
-# MockLocation — Android mock location app
+# MockLoc — Android mock location app
 
 Appears in **Settings → Developer options → Select mock location app**.
 
@@ -24,7 +24,7 @@ Appears in **Settings → Developer options → Select mock location app**.
 Android lists every app declaring this permission in "Select mock location app".
 
 ## Open in Android Studio
-1. Open this `MockLocation` folder in Android Studio (Electric Eel+).
+1. Open this folder in Android Studio (Electric Eel+).
 2. Let Gradle sync (AGP 8.5.2, Kotlin 1.9.24, compileSdk 34, minSdk 26).
 3. Run on a physical device (emulators already allow mock via Extended Controls).
 
@@ -32,7 +32,7 @@ Android lists every app declaring this permission in "Select mock location app".
 1. Install debug APK.
 2. Grant Location permission when asked.
 3. Enable Developer options: Settings → About phone → tap **Build number 7×**.
-4. Settings → System → Developer options → **Select mock location app** → choose **MockLocation**.
+4. Settings → System → Developer options → **Select mock location app** → choose **MockLoc**.
 5. Back in app: enter lat/lng → **Start mocking**.
 6. Verify in Google Maps — blue dot jumps to mocked point.
 7. **Stop mocking** restores real GPS.
@@ -46,12 +46,15 @@ Quick test points:
 ```
 app/src/main/
   AndroidManifest.xml            # ACCESS_MOCK_LOCATION + foreground service
-  java/com/example/mocklocation/
-    MainActivity.kt              # UI, permissions, start/stop
+  java/com/mockloc/app/
+    MainActivity.kt              # UI, permissions, start/stop, verify, IP country
     MockLocationService.kt       # foreground service, 1s push loop
-    LocationMockManager.kt       # addTestProvider / setTestProviderLocation
+    LocationMockManager.kt       # LocationManager + Fused mock, verification
+    BootReceiver.kt              # resume-after-reboot notification
+    IpCountryLocator.kt          # IP country detection + capital fallback
   res/layout/activity_main.xml
   res/values/strings.xml, themes.xml
+  res/drawable/ic_launcher.xml
 ```
 
 ## Notes / limits

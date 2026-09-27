@@ -1,4 +1,4 @@
-package com.example.mocklocation
+package com.mockloc.app
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -33,7 +33,7 @@ class BootReceiver : BroadcastReceiver() {
             nm.createNotificationChannel(
                 NotificationChannel(
                     MockLocationService.CHANNEL_ID,
-                    "Mock location",
+                    "MockLoc",
                     NotificationManager.IMPORTANCE_HIGH
                 )
             )
@@ -53,7 +53,7 @@ class BootReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val notif = NotificationCompat.Builder(context, MockLocationService.CHANNEL_ID)
-            .setContentTitle("Resume mock location?")
+            .setContentTitle("Resume MockLoc?")
             .setContentText(
                 String.format("Mock was active at %.6f, %.6f before reboot", lat, lng)
             )

@@ -1,4 +1,4 @@
-package com.example.mocklocation
+package com.mockloc.app
 
 import android.util.Log
 import org.json.JSONObject
@@ -84,7 +84,7 @@ object IpCountryLocator {
         val conn = (URL(url).openConnection() as HttpURLConnection).apply {
             connectTimeout = 10000
             readTimeout = 10000
-            setRequestProperty("User-Agent", "MockLocation-App")
+            setRequestProperty("User-Agent", "MockLoc-App")
             setRequestProperty("Accept", "application/json")
         }
         try {

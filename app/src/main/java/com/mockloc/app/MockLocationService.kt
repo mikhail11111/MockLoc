@@ -1,4 +1,4 @@
-package com.example.mocklocation
+package com.mockloc.app
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -114,7 +114,7 @@ class MockLocationService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Mock location active")
+            .setContentTitle("MockLoc active")
             .setContentText(String.format("%.6f, %.6f", lat, lng))
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setContentIntent(openPi)
@@ -126,7 +126,7 @@ class MockLocationService : Service() {
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                CHANNEL_ID, "Mock location",
+                CHANNEL_ID, "MockLoc",
                 NotificationManager.IMPORTANCE_LOW
             )
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
@@ -179,7 +179,7 @@ class MockLocationService : Service() {
         const val KEY_LNG = "lng"
         const val EXTRA_LAT = "extra_lat"
         const val EXTRA_LNG = "extra_lng"
-        const val ACTION_START = "com.example.mocklocation.START"
-        const val ACTION_STOP = "com.example.mocklocation.STOP"
+        const val ACTION_START = "com.mockloc.app.START"
+        const val ACTION_STOP = "com.mockloc.app.STOP"
     }
 }

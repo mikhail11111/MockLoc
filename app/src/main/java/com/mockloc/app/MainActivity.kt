@@ -1,4 +1,4 @@
-package com.example.mocklocation
+package com.mockloc.app
 
 import android.Manifest
 import android.content.Intent
@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity() {
             .setMessage(
                 "1. Enable Developer options (Settings > About phone > tap Build number 7x).\n" +
                 "2. Go to Settings > System > Developer options > Select mock location app.\n" +
-                "3. Choose \"MockLocation\" (this app).\n" +
+                "3. Choose \"MockLoc\" (this app).\n" +
                 "4. Come back and press Start again."
             )
             .setPositiveButton("Open developer options") { _, _ ->
