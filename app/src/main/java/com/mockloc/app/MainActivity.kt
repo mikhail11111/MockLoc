@@ -116,6 +116,7 @@ class MainActivity : AppCompatActivity() {
         } catch (_: Exception) {}
         // Explicit user stop — must survive service restarts/reboot prompts
         prefs.edit().remove(MockLocationService.KEY_MOCKING).apply()
+        MockWatchWorker.cancel(this)
         refreshStatus()
         Toast.makeText(this, "Mock stopped", Toast.LENGTH_SHORT).show()
     }

@@ -9,10 +9,18 @@ Windows app: see [windows/README.md](windows/README.md) (sets the system default
   - Play Services **Fused** provider via `setMockMode(true)` + `setMockLocation()` (this is what Google Maps & co. actually use).
 - **Stop mocking** removes test providers and disables fused mock mode.
 - Mocking is **persistent**: the active point is saved, the service restarts itself
-  if swiped away or killed (`START_STICKY` + saved state, never 0,0), shows a
-  one-tap "Resume mock" notification after reboot, and the
-  **Keep mock alive (battery exemption)** button asks Android not to kill it.
+  if swiped away or killed (`START_STICKY` + saved state, never 0,0), a watchdog
+  re-checks every 15 min, shows a one-tap "Resume mock" notification after reboot,
+  and the **Keep mock alive (battery exemption)** button asks Android not to kill it.
   Only an explicit **Stop mocking** ends it.
+- If the mock still dies on its own, your skin is killing it — do ALL of these:
+  - Tap **Keep mock alive (battery exemption)** in the app.
+  - Settings → Apps → MockLoc → Battery → **Unrestricted**.
+  - Lock MockLoc in the recents screen (tap the card menu → Lock).
+  - Xiaomi/HyperOS: Autostart ON + No restrictions. Huawei: App launch → Manage
+    manually → auto-launch + run in background ON. Samsung: Never sleeping apps
+    → add MockLoc; turn off Adaptive battery. Oppo/Vivo/OnePlus: equivalent
+    auto-launch + background + unrestricted steps.
 - **Verify mock is applied** reads back what Android reports on GPS + Fused and compares it to the entered point.
 - **Set location from IP country** detects the country from the public IP (ipwho.is → freeipapi.com fallback, no API key; follows VPN) and offers to mock the detected city (or the country's capital as fallback).
 - Persists last coordinates. Shows hint if app is not selected as mock app.

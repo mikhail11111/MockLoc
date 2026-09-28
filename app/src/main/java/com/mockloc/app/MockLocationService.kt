@@ -77,6 +77,7 @@ class MockLocationService : Service() {
                         .putString(KEY_LAT, lat.toString())
                         .putString(KEY_LNG, lng.toString())
                         .remove(MainActivity.KEY_LAST_ERROR).apply()
+                    MockWatchWorker.schedule(this)
                 } catch (e: LocationMockManager.MockNotSelectedException) {
                     // Surface it in the activity — otherwise the failure is silent
                     prefs.edit().putString(MainActivity.KEY_LAST_ERROR, e.message).apply()
@@ -140,6 +141,7 @@ class MockLocationService : Service() {
         } catch (_: Exception) {}
         getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
             .edit().remove(KEY_MOCKING).apply()
+        MockWatchWorker.cancel(this)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
